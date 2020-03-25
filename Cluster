@@ -1,0 +1,77 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jun 29 19:07:06 2019
+
+@author: kaushik
+"""
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+import seaborn as sns
+
+df=pd.read_csv('Cluster file.csv')
+
+
+df.isnull().sum()
+
+df = df.fillna(df.median())
+
+
+df.head()
+
+X=df.iloc[:,1:].values
+
+
+from sklearn.cluster import KMeans
+X_cluster=[]
+
+for i in range(1,30):
+    
+    kmeans = KMeans(n_clusters=i,init='k-means++',n_init=10,max_iter=300)
+    kmeans.fit(X)
+    
+    X_cluster.append(kmeans.inertia_)
+    
+    
+plt.plot(X_cluster,'ro-')
+plt.title('Elbow cluster')
+plt.xlabel('number of clusters')
+plt.ylabel('X_cluster')
+plt.show()
+
+
+kmeans = KMeans(n_clusters=8,init='k-means++',n_init=10,max_iter=300)
+y_pred=kmeans.fit_predict(X)
+
+
+df['cluster']=y_pred
+cols = list(df.columns)
+cols.remove('CUST_ID')
+
+
+sns.pairplot(df[cols],hue='cluster')
+
+
+best_cols = ["BALANCE", "PURCHASES", "CASH_ADVANCE","CREDIT_LIMIT", 
+             "PAYMENTS", "MINIMUM_PAYMENTS"]
+kmeans = KMeans(n_clusters=8,init='k-means++',n_init=10,max_iter=300)
+
+best_vals = df[best_cols].iloc[:,1:].values
+
+y_pred = kmeans.fit_predict(best_vals)
+
+df['cluster']= y_pred
+best_cols.append('cluster')
+
+sns.pairplot(df[best_cols],hue='cluster')
+
+
+
+
+
+
+
+
